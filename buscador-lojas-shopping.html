@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buscador de Lojas - Shopping</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f4f4f0;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.1);
+    --border-hover: rgba(0,0,0,0.2);
+    --text-primary: #1a1a1a;
+    --text-secondary: #666;
+    --text-hint: #999;
+    --accent: #1F3864;
+    --accent-light: #e8edf5;
+    --green-bg: #E1F5EE;
+    --green-text: #0F6E56;
+    --amber-bg: #FAEEDA;
+    --amber-text: #854F0B;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--accent);
+    padding: 1.5rem 1rem;
+    text-align: center;
+    color: white;
+  }
+
+  header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+  }
+
+  header p {
+    font-size: 13px;
+    opacity: 0.7;
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .search-wrap {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .search-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .search-row input {
+    flex: 1;
+    font-size: 15px;
+    padding: 10px 14px;
+    border: 1px solid var(--border-hover);
+    border-radius: var(--radius-md);
+    outline: none;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: inherit;
+    transition: border-color 0.15s;
+  }
+
+  .search-row input:focus {
+    border-color: var(--accent);
+    background: white;
+  }
+
+  .search-row input::placeholder { color: var(--text-hint); }
+
+  .search-row button {
+    padding: 10px 18px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+    transition: opacity 0.15s;
+  }
+
+  .search-row button:hover { opacity: 0.88; }
+  .search-row button:active { transform: scale(0.97); }
+
+  .hint {
+    font-size: 12px;
+    color: var(--text-hint);
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  .count {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    padding-left: 2px;
+  }
+
+  .result-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: box-shadow 0.15s, border-color 0.15s;
+  }
+
+  .result-card:hover {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    border-color: var(--border-hover);
+  }
+
+  .result-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 20px;
+  }
+
+  .icon-ativo { background: var(--green-bg); color: var(--green-text); }
+  .icon-vaga  { background: var(--amber-bg); color: var(--amber-text); }
+
+  .result-info { flex: 1; min-width: 0; }
+
+  .result-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .result-meta {
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 99px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .badge-ativo { background: var(--green-bg); color: var(--green-text); }
+  .badge-vaga  { background: var(--amber-bg); color: var(--amber-text); }
+
+  .empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-secondary);
+  }
+
+  .empty i {
+    font-size: 42px;
+    display: block;
+    margin-bottom: 12px;
+    opacity: 0.3;
+    color: var(--text-primary);
+  }
+
+  .empty p { font-size: 15px; margin-bottom: 6px; }
+  .empty small { font-size: 13px; color: var(--text-hint); }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 1.25rem;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    text-align: center;
+  }
+
+  .stat-num {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-hint);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  @media (max-width: 480px) {
+    header h1 { font-size: 17px; }
+    .result-name { font-size: 15px; }
+    .search-row button span { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><i class="ti ti-building-store"></i> Buscador de Lojas</h1>
+  <p>Consulte lojas por número de unidade ou nome</p>
+</header>
+
+<div class="container">
+
+  <div class="stats" id="stats"></div>
+
+  <div class="search-wrap">
+    <div class="search-row">
+      <input type="text" id="q" placeholder="Ex: 307, 201A, outback, c&a..." autocomplete="off" />
+      <button onclick="buscar()">
+        <i class="ti ti-search"></i>
+        <span>Buscar</span>
+      </button>
+    </div>
+    <p class="hint">
+      <i class="ti ti-info-circle" style="font-size:13px;vertical-align:-1px"></i>
+      Digite o número da unidade (ex: <strong>114</strong>, <strong>333A</strong>) ou parte do nome da loja (ex: <strong>outback</strong>).
+    </p>
+  </div>
+
+  <div id="resultado"></div>
+
+</div>
+
+<script>
+const lojas = [
+  ["G1","2","LOJA VAGA","VAGA"],
+  ["G1","1/3/4/5/6/7/8","MINUTO PÃO DE AÇUCAR","ATIVO"],
+  ["G1","9","QUEEN NAILS","ATIVO"],
+  ["G1","13/14","BEAUTY GOLDEN ESTÉTICA PET","ATIVO"],
+  ["G1","19","ACADEMIA TEC FIT","ATIVO"],
+  ["G1","E001","ACQUA ZERO","ATIVO"],
+  ["L1","114","BACIO DI LATTE","ATIVO"],
+  ["L1","115","CHILLI BEANS","ATIVO"],
+  ["L1","115A","CASA RIACHUELO","ATIVO"],
+  ["L1","116","ADESIVO","ATIVO"],
+  ["L1","117","FELIZ FARMA","ATIVO"],
+  ["L1","118","FELIZ FARMA","ATIVO"],
+  ["L1","119","ER INFORMÁTICA","ATIVO"],
+  ["L1","120/122","RIACHUELO","ATIVO"],
+  ["L1","123/124","ANIMA PARK","ATIVO"],
+  ["L1","125/126","CDB - MEDICINA DIAGNÓSTICA","ATIVO"],
+  ["L1","127/129/130/131/132","C&A","ATIVO"],
+  ["L1","133","LOJAS AMERICANAS","ATIVO"],
+  ["L1","----","SUSTABILIDADE","ATIVO"],
+  ["L1","134/135","ZIZANE","ATIVO"],
+  ["L1","136/137","LIVRARIA CURITIBA","ATIVO"],
+  ["L1","138/139/140","OUTBACK","ATIVO"],
+  ["L1","141","RIQUEZA","ATIVO"],
+  ["L1","142","NEW ERA","ATIVO"],
+  ["L1","143","CVC","ATIVO"],
+  ["L1","144/145/146","BECO HEXAGONAL","ATIVO"],
+  ["L1","147/148","CALLE54","ATIVO"],
+  ["L1","149","NAGAIRO SUSHI","ATIVO"],
+  ["L1","150","COCO BAMBU","ATIVO"],
+  ["L1","151","BOTICÁRIO","ATIVO"],
+  ["L1","152","SMARCASE","ATIVO"],
+  ["L1","153","OFICIAL CORINTHIANS","ATIVO"],
+  ["L1","155","CLARO","ATIVO"],
+  ["L1","156/157","ÓTICA ZÉISS","ATIVO"],
+  ["L1","158","INOVATHI","ATIVO"],
+  ["L1","159","LIFE VIVARA","ATIVO"],
+  ["L1","160","NATURA","ATIVO"],
+  ["L1","161","SIDILAR S2","ATIVO"],
+  ["L1","162/163","UP RESTAURA","ATIVO"],
+  ["L1","164","ROKUZEN","ATIVO"],
+  ["L1","165","SKY CÂMBIO","ATIVO"],
+  ["L1","166","MELHOR BOLO DE CHOCOLATE DO MUNDO","ATIVO"],
+  ["L1","166","CASA DO PÃO DE QUEIJO","ATIVO"],
+  ["L1","167","SUPER PREMIUM LOTÉRICA","ATIVO"],
+  ["L1","168","LOJA VAGA","VAGA"],
+  ["L1","169","ARRAJOS EXPRESS","ATIVO"],
+  ["L1","170","PRAÇA DA MOÇA CAFÉ","ATIVO"],
+  ["L1","171/172","SIDILAR SAÍDA 1","ATIVO"],
+  ["L1","173","FACE & FORMA","ATIVO"],
+  ["L1","174","BOTOCLINIC","ATIVO"],
+  ["L1","175","BESTLSER DEPILAÇÃO","ATIVO"],
+  ["L1","176","BARBEARIA TREZENTOS","ATIVO"],
+  ["L1","177","CROASONHO","ATIVO"],
+  ["L1","178","CASA BAUDUCCO","ATIVO"],
+  ["L1","179","LOJA VAGA","VAGA"],
+  ["L1","180","PERULA MAKE","ATIVO"],
+  ["L1","181","LOJA VAGA","VAGA"],
+  ["L1","182","LOJA VAGA","VAGA"],
+  ["L1","183/184/185","CACAU SHOW","ATIVO"],
+  ["L1","186","DECORAÇÃO","ATIVO"],
+  ["L1","187A","MILKY MOO","ATIVO"],
+  ["L1","187B","SODIÊ DOCES","ATIVO"],
+  ["L2","201","GO WORKING","ATIVO"],
+  ["L2","201A","MR CHENEY","ATIVO"],
+  ["L2","202/203","SONEDA","ATIVO"],
+  ["L2","207","PROVISÓRIA LUPO","ATIVO"],
+  ["L2","208","VELOCYTI ACADEMIA","ATIVO"],
+  ["L2","209","FARM RIO","ATIVO"],
+  ["L2","210A","ADCOS DERMOCOSMÉTICOS","ATIVO"],
+  ["L2","210","PIKORRUCHAS REST.","ATIVO"],
+  ["L2","211/216","C&A L2","ATIVO"],
+  ["L2","217/220","1A99","ATIVO"],
+  ["L2","221","PETZ","ATIVO"],
+  ["L2","222","ACADEMIA IAM ARTES MARCIAIS","ATIVO"],
+  ["L2","224","GOLDEN PET","ATIVO"],
+  ["L2","225","LOJA VAGA","VAGA"],
+  ["L2","226","ONEDA VANZELLA","ATIVO"],
+  ["L2","227","CALVIN KLEIN","ATIVO"],
+  ["L2","228","BUDDHA SPA","ATIVO"],
+  ["L2","229/230","LOJA VAGA","VAGA"],
+  ["L2","231A","CIA DO TERNO","ATIVO"],
+  ["L2","232","LOJA VAGA","VAGA"],
+  ["L2","233","GO WORK","ATIVO"],
+  ["L2","234/235","CONSTANCE","ATIVO"],
+  ["L2","236","PROJETO MULHERES DE BARRO","ATIVO"],
+  ["L2","237","MORANA","ATIVO"],
+  ["L2","238","AREZZO","ATIVO"],
+  ["L2","239","ANTYK SERRA GAÚCHA","ATIVO"],
+  ["L2","240/241","LUPO","ATIVO"],
+  ["L2","242","Q ÓCULOS","ATIVO"],
+  ["L2","243","EVENTOS SHOPPING","ATIVO"],
+  ["L2","244/245","CRIS SAKAUE","ATIVO"],
+  ["L2","246","HIGHSTIL","ATIVO"],
+  ["L2","247","LOJA VAGA","VAGA"],
+  ["L2","248","LOJA VAGA","VAGA"],
+  ["L2","249","TRACK&FIELD","ATIVO"],
+  ["L2","250","ÓTICA CAROL","ATIVO"],
+  ["L2","251/252","AUTHENTIC FEET","ATIVO"],
+  ["L2","253","MELISSA","ATIVO"],
+  ["L2","254","LOJA VAGA","VAGA"],
+  ["L2","255/256/257","KALUNGA","ATIVO"],
+  ["L2","258","GOLDEN KIDS","ATIVO"],
+  ["L2","259","KIDSTOK","ATIVO"],
+  ["L2","260/261","NICK FUN","ATIVO"],
+  ["L2","262","LOFTYSTYLE","ATIVO"],
+  ["L2","263","LOJA VAGA","VAGA"],
+  ["L2","265/266","VIVARA","ATIVO"],
+  ["L2","267","LOJA VAGA","VAGA"],
+  ["L2","268","LOJA VAGA","VAGA"],
+  ["L2","269","FRESATO CAFÉ","ATIVO"],
+  ["L2","270","ART WALK","ATIVO"],
+  ["L2","271","UNLOVSAINT","ATIVO"],
+  ["L2","272","DAVERO","ATIVO"],
+  ["L3","301","VILA TRAMPOLIM","ATIVO"],
+  ["L3","302","LOJA VAGA","VAGA"],
+  ["L3","303","SPOLETO","ATIVO"],
+  ["L3","304/305A","DIVINO FOGÃO","ATIVO"],
+  ["L3","305B","LOJA VAGA","VAGA"],
+  ["L3","306","LOJA VAGA","VAGA"],
+  ["L3","307","MC DONALDS","ATIVO"],
+  ["L3","308","CENTAURO","ATIVO"],
+  ["L3","309/310","MINISOU","ATIVO"],
+  ["L3","311","PLAY MACHINE","ATIVO"],
+  ["L3","312","CINNAROLL","ATIVO"],
+  ["L3","313","LOJA VAGA","VAGA"],
+  ["L3","314/315","PECORINO","ATIVO"],
+  ["L3","316/317","DAISO JAPÃO","ATIVO"],
+  ["L3","318","MEGA FONES","ATIVO"],
+  ["L3","319","CORPO E VIDA","ATIVO"],
+  ["L3","320A/320B","TIP-TOP","ATIVO"],
+  ["L3","321/322/323/324A/324B/325A","RENER","ATIVO"],
+  ["L3","325B/326/327","REST. FAZENDA","ATIVO"],
+  ["L3","328","SUBWAY","ATIVO"],
+  ["L3","329","PATRONI","ATIVO"],
+  ["L3","329B","LOJA VAGA","VAGA"],
+  ["L3","330","BURGER KING","ATIVO"],
+  ["L3","331/332","MEI MEI","ATIVO"],
+  ["L3","333A/333B","KFC","ATIVO"],
+  ["L3","334A","LOJA VAGA","VAGA"],
+  ["L3","334B","GENDAI","ATIVO"],
+  ["L3","335","LOJA VAGA","VAGA"],
+  ["L3","336","LOJA VAGA","VAGA"],
+  ["L3","337","GOJUICE","ATIVO"],
+  ["L3","338","LOJA VAGA","VAGA"],
+  ["L3","339","SUPERGRILL","ATIVO"],
+  ["L3","340","MANIA DE CHURRASCO","ATIVO"],
+  ["L3","341","PUKET","ATIVO"],
+  ["L3","342","PBKIDS","ATIVO"],
+  ["L3","344","LOJA VAGA","VAGA"],
+  ["L3","345","LOJA VAGA","VAGA"],
+  ["L3","346","PRAÇA PET","ATIVO"],
+  ["L3","347","ESPAÇO LAZER","ATIVO"],
+  ["L3","348","LOJA VAGA","VAGA"],
+  ["L3","349","HOPE","ATIVO"],
+  ["L3","350","KOPENAGEN","ATIVO"],
+  ["L3","351","VIVO","ATIVO"],
+  ["L3","352","NICK FUN","ATIVO"],
+  ["L3","353","MARGARIDA","ATIVO"],
+  ["L3","354/355/356/357","STYLISH CABELEIREIRO","ATIVO"],
+  ["L3","358","CHIQUINHO SORVETES","ATIVO"],
+  ["L3","358A","WE DONUTS","ATIVO"],
+  ["L3","359/360/340","MANIA DE CHURRASCO","ATIVO"],
+];
+
+const andarLabel = { "G1": "Piso G1", "L1": "Piso L1", "L2": "Piso L2", "L3": "Piso L3" };
+
+const total = lojas.length;
+const ativas = lojas.filter(l => l[3] === "ATIVO").length;
+const vagas  = lojas.filter(l => l[3] === "VAGA").length;
+
+document.getElementById('stats').innerHTML = `
+  <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total de unidades</div></div>
+  <div class="stat-card"><div class="stat-num" style="color:#0F6E56">${ativas}</div><div class="stat-label">Lojas ativas</div></div>
+  <div class="stat-card"><div class="stat-num" style="color:#854F0B">${vagas}</div><div class="stat-label">Vagas</div></div>
+`;
+
+function norm(s){ return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim(); }
+
+function buscar(){
+  const q = norm(document.getElementById('q').value);
+  const div = document.getElementById('resultado');
+  if(!q){ div.innerHTML=''; return; }
+
+  const res = lojas.filter(([andar, unidades, loja]) => {
+    const uns = unidades.split('/');
+    return uns.some(u => norm(u) === q || norm(u).includes(q))
+      || norm(unidades).includes(q)
+      || norm(loja).includes(q);
+  });
+
+  if(!res.length){
+    div.innerHTML = `<div class="empty">
+      <i class="ti ti-building-store"></i>
+      <p>Nenhuma loja encontrada para "<strong>${document.getElementById('q').value}</strong>"</p>
+      <small>Tente outro número ou parte do nome da loja.</small>
+    </div>`;
+    return;
+  }
+
+  div.innerHTML = `<p class="count">${res.length} resultado${res.length>1?'s':''} encontrado${res.length>1?'s':''}</p>` +
+    res.map(([andar, unidades, loja, status]) => {
+      const isVaga = status === 'VAGA';
+      return `<div class="result-card">
+        <div class="result-icon ${isVaga?'icon-vaga':'icon-ativo'}">
+          <i class="ti ${isVaga?'ti-door-off':'ti-building-store'}"></i>
+        </div>
+        <div class="result-info">
+          <div class="result-name">${loja}</div>
+          <div class="result-meta">
+            <span class="meta-item"><i class="ti ti-map-pin" style="font-size:13px"></i> ${andarLabel[andar]||andar}</span>
+            <span class="meta-item"><i class="ti ti-hash" style="font-size:13px"></i> Unidade ${unidades}</span>
+            <span class="badge ${isVaga?'badge-vaga':'badge-ativo'}">
+              <i class="ti ${isVaga?'ti-circle-off':'ti-circle-check'}" style="font-size:11px"></i>
+              ${isVaga?'Vaga':'Ativo'}
+            </span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+document.getElementById('q').addEventListener('keydown', e => { if(e.key==='Enter') buscar(); });
+document.getElementById('q').addEventListener('input', () => {
+  if(!document.getElementById('q').value) document.getElementById('resultado').innerHTML='';
+});
+</script>
+</body>
+</html>
